@@ -2,6 +2,7 @@ import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 import { Idl } from "../../";
 import {
+  IdlEnumVariant,
   IdlField,
   IdlInstruction,
   IdlType,
@@ -105,6 +106,7 @@ type TypeMap = {
   publicKey: PublicKey;
   bool: boolean;
   string: string;
+  bytes: Buffer;
 } & {
   [K in "u8" | "i8" | "u16" | "i16" | "u32" | "i32" | "f32" | "f64"]: number;
 } & {
@@ -138,19 +140,93 @@ type ArgsTuple<A extends IdlField[], Defined> = {
     : unknown;
 } & unknown[];
 
-type FieldsOfType<I extends IdlTypeDef> = NonNullable<
-  I["type"] extends IdlTypeDefTyStruct
-    ? I["type"]["fields"]
-    : I["type"] extends IdlTypeDefTyEnum
-    ? I["type"]["variants"][number]["fields"]
-    : any[]
->[number];
-
-export type TypeDef<I extends IdlTypeDef, Defined> = {
-  [F in FieldsOfType<I>["name"]]: DecodeType<
-    (FieldsOfType<I> & { name: F })["type"],
+type StructDef<I extends IdlField[], Defined> = {
+  [F in I[number]["name"]]: DecodeType<
+    (I[number] & { name: F })["type"],
     Defined
   >;
+};
+
+type VariantDef<
+  T extends IdlEnumVariant,
+  Defined
+> = T["fields"] extends IdlField[]
+  ? StructDef<T["fields"], Defined>
+  : T["fields"] extends IdlType[]
+  ? unknown // TODO: Tuple enum variants are not supported yet.
+  : Record<string, never>;
+
+type XorVariantDefs<T extends Record<string, unknown>> = ValueOf<{
+  [K1 in keyof T]: {
+    [K2 in Exclude<keyof T, K1>]?: never;
+  } & { [K2 in K1]: T[K2] };
+}>;
+type VariantDefs<I extends IdlEnumVariant[], Defined> = {
+  [K in I[number]["name"]]: VariantDef<I[number] & { name: K }, Defined>;
+};
+type EnumDef<I extends IdlEnumVariant[], Defined> = XorVariantDefs<
+  VariantDefs<I, Defined>
+>;
+
+export type TypeDef<
+  I extends IdlTypeDef,
+  Defined
+> = I["type"] extends IdlTypeDefTyStruct
+  ? StructDef<I["type"]["fields"], Defined>
+  : I["type"] extends IdlTypeDefTyEnum
+  ? EnumDef<I["type"]["variants"], Defined>
+  : never;
+
+type ValueOf<T> = T[keyof T];
+type FindTypeDeps<T extends IdlType> = T extends {
+  defined: string;
+}
+  ? T["defined"]
+  : T extends { option: { defined: string } }
+  ? T["option"]["defined"]
+  : T extends { coption: { defined: string } }
+  ? T["coption"]["defined"]
+  : never;
+type FindStructDeps<I extends IdlTypeDefTyStruct> = FindTypeDeps<
+  I["fields"][number]["type"]
+>;
+type FindEnumDeps<I extends IdlTypeDefTyEnum> = NonNullable<
+  I["variants"][number]["fields"]
+> extends infer T
+  ? T extends IdlField[]
+    ? FindTypeDeps<T[number]["type"]>
+    : T extends IdlType[]
+    ? FindTypeDeps<T[number]>
+    : never
+  : never;
+type FindUserDefinedDeps<I extends IdlTypeDef> =
+  I["type"] extends IdlTypeDefTyStruct
+    ? FindStructDeps<I["type"]>
+    : I["type"] extends IdlTypeDefTyEnum
+    ? FindEnumDeps<I["type"]>
+    : never;
+type FindUserDefined<T extends Record<string, IdlTypeDef>> = ValueOf<{
+  [K in keyof T]: FindUserDefinedDeps<T[K]>;
+}>;
+type UserDefinedDeps<T extends Record<string, IdlTypeDef>> = {
+  [K in FindUserDefined<T>]: FindUserDefinedDeps<T[K]>;
+};
+
+type UserDefinedDicionary<T extends Record<string, IdlTypeDef>, Defined> = {
+  [K in keyof Defined]: K extends keyof T
+    ? Defined[K] extends keyof T
+      ? TypeDef<
+          T[K],
+          UserDefinedDicionary<
+            T,
+            Pick<T, Defined[K]> & UserDefinedDeps<Pick<T, Defined[K]>>
+          >
+        >
+      : TypeDef<T[K], Record<string, never>>
+    : never;
+};
+type MapIdlTypeDefs<T extends IdlTypeDef[]> = {
+  [K in T[number]["name"]]: T[number] & { name: K };
 };
 
 type TypeDefDictionary<T extends IdlTypeDef[], Defined> = {
@@ -159,12 +235,18 @@ type TypeDefDictionary<T extends IdlTypeDef[], Defined> = {
 
 export type IdlTypes<T extends Idl> = TypeDefDictionary<
   NonNullable<T["types"]>,
-  Record<string, never>
+  UserDefinedDicionary<
+    MapIdlTypeDefs<NonNullable<T["types"]>>,
+    UserDefinedDeps<MapIdlTypeDefs<NonNullable<T["types"]>>>
+  >
 >;
 
 export type IdlAccounts<T extends Idl> = TypeDefDictionary<
   NonNullable<T["accounts"]>,
-  Record<string, never>
+  UserDefinedDicionary<
+    MapIdlTypeDefs<NonNullable<T["types"]>>,
+    UserDefinedDeps<MapIdlTypeDefs<NonNullable<T["types"]>>>
+  >
 >;
 
 export type IdlErrorInfo<IDL extends Idl> = NonNullable<IDL["errors"]>[number];
