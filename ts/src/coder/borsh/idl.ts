@@ -9,7 +9,8 @@ export class IdlCoder {
     field: { name?: string } & Pick<IdlField, "type">,
     types?: IdlTypeDef[]
   ): Layout {
-    const fieldName = field.name;
+    const fieldName =
+    field.name !== undefined ? camelCase(field.name) : undefined;
     switch (field.type) {
       case "bool": {
         return borsh.bool(fieldName);
@@ -124,7 +125,7 @@ export class IdlCoder {
       return borsh.struct(fieldLayouts, name);
     } else if (typeDef.type.kind === "enum") {
       const variants = typeDef.type.variants.map((variant: IdlEnumVariant) => {
-        const name = variant.name;
+        const name = camelCase(variant.name);
         if (variant.fields === undefined) {
           return borsh.struct([], name);
         }
@@ -141,13 +142,17 @@ export class IdlCoder {
         return borsh.struct(fieldLayouts, name);
       });
 
+      let layout;
+
       if (name !== undefined) {
         // Buffer-layout lib requires the name to be null (on construction)
         // when used as a field.
-        return borsh.rustEnum(variants).replicate(name);
+        layout = borsh.rustEnum(variants).replicate(name);
+      }else { layout = borsh.rustEnum(variants, name);
       }
 
-      return borsh.rustEnum(variants, name);
+
+      return layout;
     } else {
       throw new Error(`Unknown type kint: ${typeDef}`);
     }
