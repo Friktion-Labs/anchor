@@ -173,6 +173,8 @@ pub trait AccountDeserialize: Sized {
     /// This should only be used on account initialization, when the bytes of
     /// the account are zeroed.
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> Result<Self>;
+
+    // fn try_deserialize_unchecked_box(buf: &mut &[u8]) -> Result<Box<Self>> {}
 }
 
 /// An account data structure capable of zero copy deserialization.

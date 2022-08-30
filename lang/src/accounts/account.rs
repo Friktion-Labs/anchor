@@ -261,7 +261,7 @@ impl<'a, T: AccountSerialize + AccountDeserialize + crate::Owner + Clone> Accoun
     /// Deserializes the given `info` into a `Account` without checking
     /// the account discriminator. Be careful when using this and avoid it if
     /// possible.
-    #[inline(always)]
+    #[inline(never)]
     pub fn try_from_unchecked(info: &AccountInfo<'a>) -> Result<Account<'a, T>> {
         if info.owner == &system_program::ID && info.lamports() == 0 {
             return Err(ErrorCode::AccountNotInitialized.into());
