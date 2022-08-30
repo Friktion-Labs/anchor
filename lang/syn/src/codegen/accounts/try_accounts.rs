@@ -90,6 +90,8 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
     };
 
     quote! {
+        use copyless::BoxHelper;
+
         #[automatically_derived]
         impl<#combined_generics> anchor_lang::Accounts<#trait_generics> for #name<#struct_generics> #where_clause {
             #[inline(never)]
