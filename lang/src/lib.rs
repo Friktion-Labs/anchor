@@ -247,6 +247,7 @@ pub mod prelude {
     };
     pub use anchor_attribute_error::*;
     pub use borsh;
+    pub use copyless::*;
     pub use error::*;
     pub use solana_program::account_info::{next_account_info, AccountInfo};
     pub use solana_program::instruction::AccountMeta;
