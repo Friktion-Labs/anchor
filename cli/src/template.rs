@@ -75,6 +75,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
+copyless = "0.1.5"
 anchor-lang = "{2}"
 "#,
         name,

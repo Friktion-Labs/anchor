@@ -308,13 +308,13 @@ impl Field {
                 if *boxed {
                     if checked {
                         quote! {
-                            Box::new(#container_ty::try_from(
+                            Box::alloc().init(#container_ty::try_from(
                                 &#field,
                             )?)
                         }
                     } else {
                         quote! {
-                            Box::new(#container_ty::try_from_unchecked(
+                            Box::alloc().init(#container_ty::try_from_unchecked(
                                 &#field,
                             )?)
                         }
