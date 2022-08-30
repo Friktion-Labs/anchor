@@ -305,25 +305,34 @@ impl Field {
                 quote! { UncheckedAccount::try_from(#field.to_account_info()) }
             }
             Ty::Account(AccountTy { boxed, .. }) => {
-                let stream = if checked {
-                    quote! {
-                        #container_ty::try_from(
-                            &#field,
-                        )?
-                    }
-                } else {
-                    quote! {
-                        #container_ty::try_from_unchecked(
-                            &#field,
-                        )?
-                    }
-                };
                 if *boxed {
-                    quote! {
-                        Box::new(#stream)
+                    if checked {
+                        quote! {
+                            Box::new(#container_ty::try_from(
+                                &#field,
+                            )?)
+                        }
+                    } else {
+                        quote! {
+                            Box::new(#container_ty::try_from_unchecked(
+                                &#field,
+                            )?)
+                        }
                     }
                 } else {
-                    stream
+                    if checked {
+                        quote! {
+                            #container_ty::try_from(
+                                &#field,
+                            )?
+                        }
+                    } else {
+                        quote! {
+                            #container_ty::try_from_unchecked(
+                                &#field,
+                            )?
+                        }
+                    }
                 }
             }
             Ty::CpiAccount(_) => {
