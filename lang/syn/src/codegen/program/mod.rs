@@ -23,7 +23,6 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
     quote! {
         // TODO: remove once we allow segmented paths in `Accounts` structs.
         use self::#mod_name::*;
-        use copyless::BoxHelper;
 
         #entry
         #dispatch
