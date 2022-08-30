@@ -76,7 +76,6 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
         /// Module representing the program.
         pub mod program {
             use super::*;
-            use copyless::BoxHelper;
 
 
             /// Type representing the program.
