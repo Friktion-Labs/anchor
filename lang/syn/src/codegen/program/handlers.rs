@@ -84,6 +84,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
 
             // One time IDL account initializer. Will faill on subsequent
             // invocations.
+            #[cfg(not(feature = "no-idl"))]
             #[inline(never)]
             pub fn __idl_create_account(
                 program_id: &Pubkey,
@@ -160,6 +161,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             }
 
             #[inline(never)]
+            #[cfg(not(feature = "no-idl"))]
             pub fn __idl_create_buffer(
                 program_id: &Pubkey,
                 accounts: &mut anchor_lang::idl::IdlCreateBuffer,
@@ -173,6 +175,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             }
 
             #[inline(never)]
+            #[cfg(not(feature = "no-idl"))]
             pub fn __idl_write(
                 program_id: &Pubkey,
                 accounts: &mut anchor_lang::idl::IdlAccounts,
@@ -187,6 +190,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             }
 
             #[inline(never)]
+            #[cfg(not(feature = "no-idl"))]
             pub fn __idl_set_authority(
                 program_id: &Pubkey,
                 accounts: &mut anchor_lang::idl::IdlAccounts,
@@ -200,6 +204,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             }
 
             #[inline(never)]
+            #[cfg(not(feature = "no-idl"))]
             pub fn __idl_set_buffer(
                 program_id: &Pubkey,
                 accounts: &mut anchor_lang::idl::IdlSetBuffer,
