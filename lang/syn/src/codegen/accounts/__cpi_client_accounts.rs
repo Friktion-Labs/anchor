@@ -167,6 +167,7 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
         ///
         /// To access the struct in this module, one should use the sibling
         /// [`cpi::accounts`] module (also generated), which re-exports this.
+        #[cfg(not(feature = "no-cpi-support"))]
         pub(crate) mod #account_mod_name {
             use super::*;
 
