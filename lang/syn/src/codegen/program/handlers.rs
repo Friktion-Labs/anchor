@@ -743,6 +743,48 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             let variant_arm = generate_ix_variant(ix.raw_method.sig.ident.to_string(), &ix.args);
             let ix_name_log = format!("Instruction: {}", ix_name);
             let ret_type = &ix.returns.ty.to_token_stream();
+            // get attributes for Ident as a token stream
+            let ix_attrs = &ix.raw_method.attrs;
+            
+
+            //convert Vec<Attribute> to TokenStream
+            let ix_attrs_stream: proc_macro2::TokenStream = ix_attrs.iter().filter(
+                |attr| attr.path.is_ident("cfg") 
+            ).map(|attr| attr.to_token_stream()).collect::<Vec<proc_macro2::TokenStream>>().into_iter().collect::<proc_macro2::TokenStream>();
+            // convert Vec<TokenStream> to TokenStream
+
+            // if let Some(feature) = item_fn.attrs.iter().find_map(|attr| {
+            //     if attr.path.is_ident("cfg") {
+            //         attr.parse_meta().ok().and_then(|meta| {
+            //             if let syn::Meta::List(list) = meta {
+            //                 list.nested.iter().find_map(|nested| {
+            //                     if let syn::NestedMeta::Meta(syn::Meta::NameValue(name_value)) =
+            //                         nested
+            //                     {
+            //                         if name_value.path.is_ident("feature") {
+            //                             if let syn::Lit::Str(lit_str) = &name_value.lit {
+            //                                 return Some(lit_str.value());
+            //                             }
+            //                         }
+            //                     }
+            //                     None
+            //                 })
+            //             } else {
+            //                 None
+            //             }
+            //         })
+            //     } else {
+            //         None
+            //     }
+            // }) {
+            //     return Some(Err(ParseError::new(
+            //         item_fn.span(),
+            //         format!(
+            //             "ix function `{}` is gated by feature `{}`",
+            //             item_fn.sig.ident, feature
+            //         ),
+            //     )));
+            // }
             let maybe_set_return_data = match ret_type.to_string().as_str() {
                 "()" => quote! {},
                 _ => quote! {
@@ -750,6 +792,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
                 },
             };
             quote! {
+                #ix_attrs_stream
                 #[inline(never)]
                 pub fn #ix_method_name(
                     program_id: &Pubkey,

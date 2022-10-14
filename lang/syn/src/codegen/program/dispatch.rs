@@ -1,6 +1,6 @@
 use crate::codegen::program::common::*;
 use crate::Program;
-use quote::quote;
+use quote::{quote, ToTokens};
 
 pub fn generate(program: &Program) -> proc_macro2::TokenStream {
     // Dispatch the state constructor.
@@ -102,7 +102,18 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
             let sighash_arr = sighash(SIGHASH_GLOBAL_NAMESPACE, &ix_method_name.to_string());
             let sighash_tts: proc_macro2::TokenStream =
                 format!("{:?}", sighash_arr).parse().unwrap();
+            let ix_attrs_stream: proc_macro2::TokenStream = ix
+                .raw_method
+                .attrs
+                .iter()
+                .filter(|attr| attr.path.is_ident("cfg"))
+                .map(|attr| attr.to_token_stream())
+                .collect::<Vec<proc_macro2::TokenStream>>()
+                .into_iter()
+                .collect::<proc_macro2::TokenStream>();
+
             quote! {
+                #ix_attrs_stream
                 #sighash_tts => {
                     __private::__global::#ix_method_name(
                         program_id,

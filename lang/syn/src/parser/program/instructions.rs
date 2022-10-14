@@ -16,7 +16,10 @@ pub fn parse(program_mod: &syn::ItemMod) -> ParseResult<(Vec<Ix>, Option<Fallbac
         .iter()
         .filter_map(|item| match item {
             syn::Item::Fn(item_fn) => {
+                
+
                 let (ctx, _) = parse_args(item_fn).ok()?;
+
                 ctx_accounts_ident(&ctx.raw_arg).ok()?;
                 Some(item_fn)
             }
