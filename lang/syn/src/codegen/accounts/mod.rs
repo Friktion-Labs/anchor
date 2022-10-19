@@ -28,7 +28,9 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
         #impl_to_account_metas
         #impl_exit
 
+        #[cfg(not(feature = "no-client-accounts"))]
         #__client_accounts_mod
+        #[cfg(not(feature = "no-cpi-support"))]
         #__cpi_client_accounts_mod
     }
 }

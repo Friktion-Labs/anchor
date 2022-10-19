@@ -29,7 +29,9 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
         #handlers
         #user_defined_program
         #instruction
+        #[cfg(not(feature = "no-cpi-support"))]
         #cpi
+        #[cfg(not(feature = "no-client-accounts"))]
         #accounts
     }
 }
