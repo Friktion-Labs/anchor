@@ -28,6 +28,7 @@ pub fn generate(program: &Program) -> proc_macro2::TokenStream {
         #dispatch
         #handlers
         #user_defined_program
+        #[cfg(not(feature = "no-instruction-support"))]
         #instruction
         #[cfg(not(feature = "no-cpi-support"))]
         #cpi
