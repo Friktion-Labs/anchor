@@ -1,6 +1,7 @@
 use crate::codegen::accounts::{generics, ParsedGenerics};
 use crate::{AccountField, AccountsStruct};
 use quote::quote;
+use syn::parse::Parse;
 
 // Generates the `ToAccountInfos` trait implementation.
 pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
@@ -29,7 +30,7 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
         #[automatically_derived]
         impl<#combined_generics> anchor_lang::ToAccountInfos<#trait_generics> for #name <#struct_generics> #where_clause{
             fn to_account_infos(&self) -> Vec<anchor_lang::solana_program::account_info::AccountInfo<'info>> {
-                let mut account_infos = vec![];
+                let mut account_infos = Vec::with_capacity(anchor_lang::NumAccounts::num_accounts(self));
 
                 #(#to_acc_infos)*
 

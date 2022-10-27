@@ -28,7 +28,7 @@ impl<'info, T: Accounts<'info>> Accounts<'info> for Vec<T> {
         bumps: &mut BTreeMap<String, u8>,
         reallocs: &mut BTreeSet<Pubkey>,
     ) -> Result<Self> {
-        let mut vec: Vec<T> = Vec::new();
+        let mut vec: Vec<T> = Vec::with_capacity(accounts.len());
         T::try_accounts(program_id, accounts, ix_data, bumps, reallocs)
             .map(|item| vec.push(item))?;
         Ok(vec)

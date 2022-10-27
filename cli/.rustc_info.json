@@ -1,0 +1,1 @@
+{"rustc_fingerprint":10670251437200608385,"outputs":{"17598535894874457435":{"success":true,"status":"","code":0,"stdout":"rustc 1.61.0-nightly (335ffbfa5 2022-03-11)\nbinary: rustc\ncommit-hash: 335ffbfa547df94ac236f5c56130cecf99c8d82b\ncommit-date: 2022-03-11\nhost: aarch64-apple-darwin\nrelease: 1.61.0-nightly\nLLVM version: 14.0.0\n","stderr":""}},"successes":{}}

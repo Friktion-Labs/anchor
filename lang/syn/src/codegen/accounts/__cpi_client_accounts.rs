@@ -159,6 +159,44 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
         name
     ))
     .unwrap();
+
+    let last_symbol = match accs.fields.get(accs.fields.len() - 1).unwrap() {
+        AccountField::CompositeField(s) => &s.ident,
+        AccountField::Field(f) => &f.ident,
+    };
+
+    let num_accounts_each: Vec<proc_macro2::TokenStream> = accs
+        .fields
+        .iter()
+        .map(|f: &AccountField| {
+            let (num_accounts_current, last_field) = match f {
+                AccountField::CompositeField(s) => {
+                    let composite_field_name = &s.ident;
+                    (
+                        quote! {
+                            self.#composite_field_name.num_accounts()
+                        },
+                        &s.ident == last_symbol,
+                    )
+                }
+                AccountField::Field(f) => (
+                    quote! {
+                        1
+                    },
+                    &f.ident == last_symbol,
+                ),
+            };
+            let plus_sign = if last_field {
+                quote! {}
+            } else {
+                quote! { + }
+            };
+            quote! {
+                #num_accounts_current #plus_sign
+            }
+        })
+        .collect();
+
     quote! {
         /// An internal, Anchor generated module. This is used (as an
         /// implementation detail), to generate a CPI struct for a given
@@ -178,10 +216,16 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
                 #(#account_struct_fields),*
             }
 
+            impl #generics anchor_lang::NumAccounts for #name #generics {
+                fn num_accounts(&self) -> usize {
+                    #(#num_accounts_each)*
+                }
+            }
+
             #[automatically_derived]
             impl #generics anchor_lang::ToAccountMetas for #name #generics {
                 fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<anchor_lang::solana_program::instruction::AccountMeta> {
-                    let mut account_metas = vec![];
+                    let mut account_metas = Vec::with_capacity(anchor_lang::NumAccounts::num_accounts(self));
                     #(#account_struct_metas)*
                     account_metas
                 }
@@ -190,7 +234,7 @@ pub fn generate(accs: &AccountsStruct) -> proc_macro2::TokenStream {
             #[automatically_derived]
             impl<'info> anchor_lang::ToAccountInfos<'info> for #name #generics {
                 fn to_account_infos(&self) -> Vec<anchor_lang::solana_program::account_info::AccountInfo<'info>> {
-                    let mut account_infos = vec![];
+                    let mut account_infos = Vec::with_capacity(anchor_lang::NumAccounts::num_accounts(self));
                     #(#account_struct_infos)*
                     account_infos
                 }

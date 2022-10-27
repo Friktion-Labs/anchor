@@ -265,6 +265,10 @@ pub mod prelude {
     pub use thiserror;
 }
 
+pub trait NumAccounts {
+    fn num_accounts(&self) -> usize;
+}
+
 /// Internal module used by macros and unstable apis.
 #[doc(hidden)]
 pub mod __private {
