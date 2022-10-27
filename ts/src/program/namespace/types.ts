@@ -129,6 +129,8 @@ export type DecodeType<T extends IdlType, Defined> = T extends keyof TypeMap
   ? TypeMap[T["vec"]][]
   : T extends { array: [defined: keyof TypeMap, size: number] }
   ? TypeMap[T["array"][0]][]
+  : T extends { array: [{defined: keyof Defined}, number] }
+  ? Defined[T["array"][0]["defined"]][]
   : unknown;
 
 /**
@@ -186,7 +188,10 @@ type FindTypeDeps<T extends IdlType> = T extends {
   ? T["option"]["defined"]
   : T extends { coption: { defined: string } }
   ? T["coption"]["defined"]
+  : T extends { array: [{defined: string}, number] }
+  ? T["array"][0]["defined"][]
   : never;
+
 type FindStructDeps<I extends IdlTypeDefTyStruct> = FindTypeDeps<
   I["fields"][number]["type"]
 >;
@@ -205,6 +210,7 @@ type FindUserDefinedDeps<I extends IdlTypeDef> =
     : I["type"] extends IdlTypeDefTyEnum
     ? FindEnumDeps<I["type"]>
     : never;
+    
 type FindUserDefined<T extends Record<string, IdlTypeDef>> = ValueOf<{
   [K in keyof T]: FindUserDefinedDeps<T[K]>;
 }>;
