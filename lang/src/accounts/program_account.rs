@@ -67,6 +67,12 @@ impl<'a, T: AccountSerialize + AccountDeserialize + Clone> ProgramAccount<'a, T>
         ))
     }
 
+    pub fn reload(&mut self) -> Result<()> {
+        let mut data: &[u8] = &self.inner.info.try_borrow_data()?;
+        self.inner.account = T::try_deserialize(&mut data)?;
+        Ok(())
+    }
+
     pub fn into_inner(self) -> T {
         self.inner.account
     }
