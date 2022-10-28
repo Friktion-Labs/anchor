@@ -11,7 +11,7 @@ export function accountSize(idl: Idl, idlAccount: IdlTypeDef): number {
         return variant.fields
           .map((f: IdlField | IdlType) => {
             if (!(typeof f === "object" && "name" in f)) {
-              throw new Error("Tuple enum variants not yet implemented.");
+              throw new Error("Tuple enum variants not yet implemented, f = " + variant.name);
             }
             return typeSize(idl, f.type);
           })

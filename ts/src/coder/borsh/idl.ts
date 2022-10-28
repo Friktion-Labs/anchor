@@ -131,7 +131,7 @@ export class IdlCoder {
         }
         const fieldLayouts = variant.fields.map((f: IdlField | IdlType) => {
           if (!f.hasOwnProperty("name")) {
-            throw new Error("Tuple enum variants not yet implemented.");
+            throw new Error("Tuple enum variants not yet implemented, f = " + variant.name);
           }
           // this typescript conversion is ok
           // because if f were of type IdlType
