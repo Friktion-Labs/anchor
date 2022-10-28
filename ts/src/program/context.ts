@@ -65,7 +65,7 @@ export type Accounts<A extends IdlAccountItem = IdlAccountItem> = {
   [N in A["name"]]: Account<A & { name: N }>;
 };
 
-type Account<A extends IdlAccountItem> = A extends IdlAccounts
+type Account<A extends IdlAccountItem> = A extends never ? never : A extends IdlAccounts
   ? Accounts<A["accounts"][number]>
   : Address;
 
