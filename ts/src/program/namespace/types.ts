@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import { Idl } from "../../";
+import { Idl, Program } from "../../";
 import {
   IdlEnumVariant,
   IdlField,
@@ -129,8 +129,8 @@ export type DecodeType<T extends IdlType, Defined> = T extends keyof TypeMap
   ? TypeMap[T["vec"]][]
   : T extends { array: [defined: keyof TypeMap, size: number] }
   ? TypeMap[T["array"][0]][]
-  : T extends { array: [{defined: keyof Defined}, number] }
-  ? Defined[T["array"][0]["defined"]][]
+  // : T extends { array: [{defined: keyof Defined}, number] }
+  // ? Defined[T["array"][0]["defined"]][]
   : unknown;
 
 /**
@@ -256,3 +256,14 @@ export type IdlAccounts<T extends Idl> = TypeDefDictionary<
 >;
 
 export type IdlErrorInfo<IDL extends Idl> = NonNullable<IDL["errors"]>[number];
+
+export type ClientAccountTypes<IDL extends Idl = Idl> = {
+  [K in keyof AllAccountsMap<IDL>]: TypeDef<NonNullable<IDL["accounts"]>[number] & { name: K }, IdlTypes<IDL>>;
+}
+
+export type InstructionAccounts<T extends Idl, P extends Program<T>> = {
+  [K in keyof P["instruction"]]: Parameters<P["instruction"][K]["accounts"]>[0]
+}
+  
+// [K in keyof AllInstructionsMap<T>]: Accounts<AllInstructionsMap<T>[K]["accounts"][number]>
+

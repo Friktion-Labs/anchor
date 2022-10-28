@@ -68,11 +68,22 @@ export type AccountNamespace<IDL extends Idl = Idl> = {
   >;
 };
 
+export type AccountTypesDict<IDL extends Idl = Idl> = {
+  [K in keyof AllAccountsMap<IDL>]: TypeDef<NonNullable<IDL["accounts"]>[number] & { name: K }, IdlTypes<IDL>>;
+}
+
 export class AccountClient<
   IDL extends Idl = Idl,
   A extends IdlAccountDef = NonNullable<IDL["accounts"]>[number],
   T = TypeDef<A, IdlTypes<IDL>>
 > {
+  // accountTyped: T;
+
+  get type(): T {
+    throw new Error("unsupported");
+  }
+  
+  // get size()
   /**
    * Returns the number of bytes in this account.
    */
