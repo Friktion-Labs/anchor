@@ -16,6 +16,7 @@ import NamespaceFactory, {
 import { utf8 } from "../utils/bytes/index.js";
 import { EventManager } from "./event.js";
 import { Address, translateAddress } from "./common.js";
+import { ClientAccountTypes } from './namespace/types';
 
 export * from "./common.js";
 export * from "./context.js";
@@ -104,6 +105,7 @@ export class Program<IDL extends Idl = Idl> {
    * For the full API, see the [[AccountClient]] reference.
    */
   readonly account: AccountNamespace<IDL>;
+
 
   /**
    * The namespace provides functions to build [[TransactionInstruction]]
@@ -214,13 +216,15 @@ export class Program<IDL extends Idl = Idl> {
   readonly state?: StateClient<IDL>;
 
   /**
-   * The namespace provides a builder API for all APIs on the program.
+   * The namClientAccountTypesespace provides a builder API for all APIs on the program.
    * This is an alternative to using namespace the other namespaces..
    */
   readonly methods: MethodsNamespace<IDL>;
 
   readonly views?: ViewNamespace<IDL>;
 
+  readonly accountTypes: ClientAccountTypes<IDL>;
+  
   /**
    * Address of the program.
    */
